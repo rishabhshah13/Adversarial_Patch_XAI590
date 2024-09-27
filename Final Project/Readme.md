@@ -5,7 +5,7 @@
 
 ## Project Overview
 
-This tool generates multiple responses from a Large Language Model (LLM) for a single input question using various parameter combinations (temperature, top-K, etc.). It then visualizes the attention patterns and log probabilities for each response, allowing users to explore how different parameters affect the model's output, internal attention mechanisms, and token probabilities.
+This tool generates multiple responses from a Large Language Model (LLM) for a single input question using various parameter combinations (temperature, top-K, etc.). It then visualizes the log probabilities for each response, allowing users to explore how different parameters affect the model's output, and token probabilities.
 
 ## Features
 
