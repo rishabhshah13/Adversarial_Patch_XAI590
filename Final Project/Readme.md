@@ -1,7 +1,7 @@
 # LLM Response Visualizer
 
 # TO BE ADDED SOON
-[Final Project Ideation Video]()
+[Final Project Ideation Video](https://youtu.be/VmPNgspBAeU)
 
 ## Project Overview
 
