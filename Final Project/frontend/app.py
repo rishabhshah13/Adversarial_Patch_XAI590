@@ -152,7 +152,7 @@ st.subheader("Attention Heatmap Visualization")
 
 if st.button("Visualize Attention"):
     payload = {"prompt": prompt}
-    st.write(payload)
+    # st.write(payload)
     attention_response = requests.post(f"{API_BASE_URL}/attention_weights", json=payload)
 
     if attention_response.status_code == 200:
@@ -160,32 +160,11 @@ if st.button("Visualize Attention"):
         attention = torch.tensor(attention_data["attention"])  # Convert to NumPy array
         tokens = attention_data["tokens"]
 
-        # st.write("Attention tensor shape:", attention.shape)
-
-        # # Expected axes for 4D tensors: (batch_size, seq_len, num_heads, seq_len)
-        # # Debug: Check the attention tensor shape
-        # print("Attention tensor shape before processing:", attention.shape)
-
-        # if len(attention.shape) == 5:  # (num_layers, batch_size, num_heads, seq_len, seq_len)
-        #     formatted_attention = []
-        #     for layer_idx, layer_attention in enumerate(attention):
-        #         print(f"Processing layer {layer_idx} attention shape: {layer_attention.shape}")
-        #         # Correct transposition for 4D tensor
-        #         transposed_attention = np.transpose(layer_attention, (0, 2, 1, 3))  # (batch_size, seq_len, num_heads, seq_len)
-        #         formatted_attention.append(transposed_attention)
-        #         print(f"Layer {layer_idx} transposed shape: {transposed_attention.shape}")
-        #     print("All layers processed. Ready for visualization.")
-        # else:
-        #     raise ValueError(f"Unexpected attention tensor shape: {attention.shape}")
-
-        # Adjust attention shape to match bertviz input requirements
-        # attention_tensor = np.transpose(formatted_attention, (0, 2, 1, 3))
-
 
         # Display the heatmap using bertviz's head_view
         st.write("**Attention Heatmap:**")
         # head_view(attention_tensor, tokens, tokens)
-        st.write(attention.shape)
+        # st.write(attention.shape)
         # head_view(attention, tokens)
 
         import streamlit.components.v1 as components
@@ -194,14 +173,13 @@ if st.button("Visualize Attention"):
         html_head_view = head_view(attention, tokens, html_action="return")
         output_path = "frontend/outputs/head_view.html"
 
-        st.write(tokens)
+        # st.write(tokens)
         # Save HTML file
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "w") as file:
             file.write(html_head_view.data)
 
         # Display HTML file in Streamlit
-        st.write("**Attention Heatmap:**")
         with open(output_path,'r') as f:
             html_data = f.read()
 
@@ -248,58 +226,3 @@ if st.button("Generate Steering Output"):
             st.write(results["neutral"])
     else:
         st.error(f"Error: {response.status_code} - {response.json().get('detail', 'Unknown error')}")
-
-
-
-# # Export Results Section
-# st.subheader("Export Results")
-
-# # Export responses and probabilities
-# export_data = {}
-
-# if st.session_state.response1 is not None and st.session_state.response2 is not None:
-#     export_data = {
-#         "Prompt": prompt,
-#         "Config 1": {
-#             "Temperature": temp1,
-#             "Top-K": top_k1,
-#             "Response": st.session_state.response1,
-#             "Probabilities": st.session_state.prob1,
-#         },
-#         "Config 2": {
-#             "Temperature": temp2,
-#             "Top-K": top_k2,
-#             "Response": st.session_state.response2,
-#             "Probabilities": st.session_state.prob2,
-#         }
-#     }
-
-#     # Export as JSON
-#     json_data = json.dumps(export_data, indent=4)
-#     st.download_button(
-#         label="Download as JSON",
-#         data=json_data,
-#         file_name="response_analysis.json",
-#         mime="application/json"
-#     )
-
-#     # Export as CSV
-#     flat_data = []
-#     for config, details in export_data.items():
-#         if config != "Prompt":
-#             flat_data.append({
-#                 "Prompt": prompt,
-#                 "Configuration": config,
-#                 "Temperature": details["Temperature"],
-#                 "Top-K": details["Top-K"],
-#                 "Response": details["Response"]
-#             })
-#     csv_data = pd.DataFrame(flat_data).to_csv(index=False).encode('utf-8')
-#     st.download_button(
-#         label="Download as CSV",
-#         data=csv_data,
-#         file_name="response_analysis.csv",
-#         mime="text/csv"
-#     )
-# else:
-#     st.write("Generate responses to enable export functionality.")

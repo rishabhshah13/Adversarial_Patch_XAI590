@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from backend.api.model_loader import load_model
 from transformer_lens import HookedTransformer
-from backend.api.visualizer import generate_response, get_token_probabilities, get_attention_weights
+from backend.api.visualizer import generate_response, get_token_probabilities, get_attention_weights, generate_response_with_log_probs
 import torch
 
 router = APIRouter()
@@ -119,6 +119,23 @@ class AttentionWeightsRequest(BaseModel):
 def attention_weights_route(request: AttentionWeightsRequest):
     return get_attention_weights(request.prompt)
 
+
+from backend.api.visualizer import generate_response_with_log_probs
+
+class GenerateResponseWithLogProbsRequest(BaseModel):
+    prompt: str
+    temperature: float
+    top_k: int
+    max_new_tokens: int
+
+@router.post("/generate_response_with_log_probs")
+def generate_response_with_log_probs_route(request: GenerateResponseWithLogProbsRequest):
+    result = generate_response_with_log_probs(
+        request.prompt, request.temperature, request.top_k, request.max_new_tokens
+    )
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
 
 
 # from fastapi import APIRouter
