@@ -2,6 +2,18 @@ import torch
 from backend.api.model_loader import model_cache
 
 def generate_response(prompt: str, temperature: float = 0.7, top_k: int = 50, max_new_tokens: int = 20):
+    """
+    Generate a response from the language model based on the input prompt.
+
+    Args:
+        prompt (str): The input text to provide to the model.
+        temperature (float): Controls the randomness of predictions (default: 0.7).
+        top_k (int): Limits the next token selection to the top K most probable tokens (default: 50).
+        max_new_tokens (int): Maximum number of tokens to generate (default: 20).
+
+    Returns:
+        dict: Contains the generated response as a string or an error message if no model is loaded.
+    """
     if not model_cache:
         return {"error": "No model is loaded. Please load a model first."}
     
@@ -9,20 +21,18 @@ def generate_response(prompt: str, temperature: float = 0.7, top_k: int = 50, ma
     model = model_cache[model_name]["model"]
     tokenizer = model_cache[model_name]["tokenizer"]
 
-    # torch.manual_seed(2341)
-
     # Tokenize input with padding
     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
     
     # Generate response
     outputs = model.generate(
         inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],  # Use attention mask for reliable results
+        attention_mask=inputs["attention_mask"],
         do_sample=True,
         temperature=temperature,
         top_k=top_k,
         max_new_tokens=max_new_tokens,
-        pad_token_id=tokenizer.eos_token_id,  # Set pad_token_id explicitly
+        pad_token_id=tokenizer.eos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
     response = tokenizer.decode(outputs[0], skip_special_tokens=False)
@@ -30,6 +40,18 @@ def generate_response(prompt: str, temperature: float = 0.7, top_k: int = 50, ma
 
 
 def generate_response_with_log_probs(prompt: str, temperature: float = 0.7, top_k: int = 50, max_new_tokens: int = 20):
+    """
+    Generate a response and compute the log probabilities for each generated token.
+
+    Args:
+        prompt (str): The input text to provide to the model.
+        temperature (float): Controls the randomness of predictions (default: 0.7).
+        top_k (int): Limits the next token selection to the top K most probable tokens (default: 50).
+        max_new_tokens (int): Maximum number of tokens to generate (default: 20).
+
+    Returns:
+        dict: Contains the generated response, tokens, and log probabilities for each token, or an error message if no model is loaded.
+    """
     if not model_cache:
         return {"error": "No model is loaded. Please load a model first."}
 
@@ -55,11 +77,11 @@ def generate_response_with_log_probs(prompt: str, temperature: float = 0.7, top_
     )
 
     # Decode generated tokens
-    generated_tokens = outputs.sequences[0]  # Shape: (num_generated_tokens,)
+    generated_tokens = outputs.sequences[0]
     response = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
     # Extract logits and compute probabilities for each token
-    logits = torch.stack(outputs.scores, dim=0)  # Shape: (num_generated_tokens, vocab_size)
+    logits = torch.stack(outputs.scores, dim=0)
     probabilities = torch.softmax(logits, dim=-1)
     log_probs = torch.log(probabilities)
 
@@ -79,8 +101,16 @@ def generate_response_with_log_probs(prompt: str, temperature: float = 0.7, top_
     }
 
 
-
 def get_token_probabilities(prompt: str):
+    """
+    Compute the token probabilities for the given prompt.
+
+    Args:
+        prompt (str): The input text to provide to the model.
+
+    Returns:
+        dict: Contains token probabilities as a list or an error message if the prompt is empty.
+    """
     if not prompt:
         return {"error": "Prompt cannot be empty"}
     model_name = list(model_cache.keys())[0]
@@ -95,7 +125,15 @@ def get_token_probabilities(prompt: str):
 
 
 def get_attention_weights(prompt: str):
+    """
+    Retrieve attention weights from the model for the given prompt.
 
+    Args:
+        prompt (str): The input text to provide to the model.
+
+    Returns:
+        dict: Contains the attention weights and corresponding tokens, or an error message if the prompt is empty.
+    """
     if not prompt:
         return {"error": "Prompt cannot be empty"}
 
@@ -103,22 +141,12 @@ def get_attention_weights(prompt: str):
     model = model_cache[model_name]["model"]
     tokenizer = model_cache[model_name]["tokenizer"]
 
-    
-    from transformers import AutoModelForCausalLM, AutoTokenizer,AutoModel
-    
-    # tokenizer = AutoTokenizer.from_pretrained('gpt2')
-    # model = AutoModel.from_pretrained("distilbert-base-uncased", output_attentions=True)
     inputs = tokenizer.encode(prompt, return_tensors='pt')
     outputs = model(inputs)
     attention = outputs[-1]  # Output includes attention weights when output_attentions=True
     tokens = tokenizer.convert_ids_to_tokens(inputs[0]) 
-    print(torch.tensor([layer.tolist() for layer in attention]).shape)
 
-
+    # Format attention as a list for further processing
     formatted_attention = [layer.tolist() for layer in attention]
-        
-    print(torch.tensor(formatted_attention).shape)
-
+    
     return {"attention": formatted_attention, "tokens": tokens}
-
-
