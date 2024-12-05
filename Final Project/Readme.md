@@ -53,8 +53,8 @@ Understanding AI isn’t just for researchers anymore. This tool bridges the gap
 ### **Installation**  
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/your-repo/llm-response-visualizer.git
-   cd llm-response-visualizer
+   git clone https://github.com/rishabhshah13/Adversarial_Patch_XAI590.git
+   cd Final Project
    ```  
 2. Create a virtual environment and activate it:  
    ```bash
