@@ -114,6 +114,14 @@ Explore how parameters affect responses:
 
 ---
 
+---
+
+## **UI** 
+![screenshot](Working_Screenshot.jpeg)
+
+---
+
+
 ## **Credits and Inspiration** ✨  
 This project draws inspiration from:  
 - [BertViz](https://github.com/jessevig/bertviz): Attention visualization.  
